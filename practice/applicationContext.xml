@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+					    http://www.springframework.org/schema/beans/spring-beans.xsd
+					    http://www.springframework.org/schema/context
+					    http://www.springframework.org/schema/context/spring-context.xsd
+					    http://www.springframework.org/schema/aop 
+					    http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+					    http://www.springframework.org/schema/tx
+        				http://www.springframework.org/schema/tx/spring-tx-3.0.xsd">
+
+	<!--加载数据库的配置文件  -->
+	<context:property-placeholder location="/WEB-INF/properties/db.properties"/>
+	<!--数据源  -->
+	<bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+		<property name="driverClass" value="${jdbc.driver}"/>
+        <property name="jdbcUrl" value="${jdbc.url}" />
+        <property name="user" value="${jdbc.userName}"/>
+        <property name="password" value="${jdbc.password}"/>
+	</bean>
+	<!--获取sqlSessionFactory  -->
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource"></property>
+		<property name="configLocation" value="/WEB-INF/mybatis/configration.xml"></property>
+	</bean>
+	<!--mapper批量扫描，从mapper包中扫描出mapper接口，自动创建代理对象，并且在spring容器中注册
+		遵循规范：将mapper.java和mapper.xml映射文件名一致，且在一个目录中。
+		自动扫描出来的类名为mapper的bean的id，首字母小写。UserMappper-》usermapper
+	  -->
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<!--如果扫描多个包，每个包中间使用半角逗号分割  -->
+		<property name="basePackage" value="net.codejava.springmvc.mapper"/>
+		<property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"/>
+	</bean>
+
+	<!-- <context:annotation-config /> -->
+	<context:component-scan base-package="net.codejava.springmvc">
+		<context:include-filter type="assignable"
+			expression="net.codejava.springmvc.test.Instrument" />
+	</context:component-scan>
+
+<!-- 	<aop:config>
+		<aop:aspect ref="audience">
+			<aop:pointcut id="performance2" expression="execution(* net.codejava.springmvc.test.Performer.perform(..))   
+				 and within(net.codejava.springmvc.test.*)"/>
+			<aop:around pointcut-ref="performance2"
+			method="watchPerformance"/>
+		</aop:aspect>
+	</aop:config> -->
+
+</beans>
